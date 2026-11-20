@@ -86,7 +86,11 @@ class UsageDeviceChannel {
       final map = await channel.invokeMapMethod<String, Object?>('device') ?? const {};
       String text(String key) => map[key] is String ? map[key]! as String : '';
       int number(String key) => map[key] is num ? (map[key]! as num).toInt() : 0;
-      final app = text('versionName');
+      // Android 的展示后缀不属于统计协议的版本字段。
+      final nativeVersion = text('versionName');
+      final app = nativeVersion.endsWith('.dev')
+          ? nativeVersion.substring(0, nativeVersion.length - '.dev'.length)
+          : nativeVersion;
       return UsageDevice(
         app: app.isEmpty ? fallback : app,
         build: number('versionCode'),

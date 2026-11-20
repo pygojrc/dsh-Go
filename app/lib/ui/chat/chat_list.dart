@@ -18,6 +18,7 @@ import '../../l10n/l10n.dart';
 import '../../pets/pet_signals.dart' show petHeadroomProvider;
 import '../../plugins/native/native_surface.dart' show nativeTurnNoteProvider;
 import '../../state/agents_state.dart' show hostSessionsProvider, selectConversation;
+import '../../state/android_features.dart' show appUpdateAvailableProvider;
 import '../../state/app_notes.dart';
 import '../../state/artifacts.dart';
 import '../../state/attachments.dart' show DraftAttachment;
@@ -1406,7 +1407,10 @@ class _ChatListState extends ConsumerState<ChatList> with SingleTickerProviderSt
       return null;
     }
     if (refused) {
-      if (code == 'CLIENT_UPGRADE_REQUIRED' && !wordsForIos && ref.read(activeHostProvider).kind == HostKind.local) {
+      if (code == 'CLIENT_UPGRADE_REQUIRED' &&
+          !wordsForIos &&
+          ref.read(appUpdateAvailableProvider) &&
+          ref.read(activeHostProvider).kind == HostKind.local) {
         return (label: appL10n.updateCheck, onPressed: () => checkForUpdates(context, ref));
       }
       return widget.onSwitchModel == null ? null : (label: appL10n.chatSwitchModel, onPressed: _switchModel);

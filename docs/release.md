@@ -1,5 +1,14 @@
 # 发版与应用内更新
 
+## pygojrc Android 开发版
+
+- `ms-dev` 上的 APK 使用 `dev.ms.dsh_app` 和固定的 pygojrc 签名，版本显示 `1.3.0.dev`。用户从 GitHub Release 手动安装 APK。
+- 本机构建先运行 `runtime/build-runtime.sh arm64-v8a`，再用 `tooling/build-apk.sh --no-companion -f arm64`。`app/android/key.properties` 指向本地的独立签名配置，密钥放在 Git 忽略的 `.ms/signing/`。
+- [Android dev APK](../.github/workflows/android-dev-release.yml) 从 `ms-dev` 手动运行。默认只保留 Actions artifact。若要发预发布版本，先让 `v<版本>.dev` 标签指向待构建的提交，再显式启用 `publish`。APK 与 `SHA256SUMS` 一起上传。首次使用 `workflow_dispatch` 前，workflow 文件须存在于 fork 的默认分支。
+- Actions 复用 `DSH_ANDROID_KEYSTORE_B64`、`DSH_ANDROID_KEYSTORE_PASSWORD` 和 `DSH_ANDROID_CERT_SHA256`。对外发布前按 [素材授权](../ASSETS.md) 处理上游名称、图标和其他受限素材。
+
+## 上游发布流程
+
 App 以 APK 分发、不上商店，更新靠 App 自己查 GitHub Releases、下载、校验、调系统安装器。本文是发版约定和步骤，以及更新链路的取舍。代码在 `app/lib/update/`（检查、下载、校验）、`app/lib/state/update_state.dart`（状态与节流）、`app/lib/ui/update/`（设置行、弹窗）、`app/android/.../update/`（PackageInstaller 安装）。
 
 > **正式发版前必须先换成固定的发布密钥**（见「签名」）。存在 `app/android/key.properties` 时 release 使用其中的发布密钥；缺少配置时仅为本地构建回落到 debug key，不可用于正式发布。

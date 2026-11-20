@@ -356,8 +356,7 @@ class _HomeShellState extends ConsumerState<HomeShell> with TickerProviderStateM
                           const ResetReceiptHost(),
                         ],
                       ],
-                      // Daily update check + install resume (draws nothing).
-                      const UpdateLaunchCheck(),
+                      if (ref.watch(appUpdateAvailableProvider)) const UpdateLaunchCheck(),
                       // The voice model chosen during setup: download, resume, ready / failed notices (draws nothing).
                       const VoiceModelHost(),
                       // 公测版: once in a while, an invitation to star the project (draws nothing).

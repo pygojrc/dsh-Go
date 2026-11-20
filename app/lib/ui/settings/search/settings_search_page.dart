@@ -160,9 +160,14 @@ class _SettingsSearchPageState extends ConsumerState<SettingsSearchPage> {
     final query = _field.text;
     final extra = ref.watch(_pluginSpotsProvider);
     final androidFeatures = ref.watch(androidSystemFeaturesProvider);
+    final updatesAvailable = ref.watch(appUpdateAvailableProvider);
     List<SearchHit> search({required bool androidFeatures}) => searchSettings(
       query,
-      spots: [...SettingsIndex.spots, ...extra],
+      spots: [
+        for (final spot in SettingsIndex.spots)
+          if (updatesAvailable || (spot != Spots.updateCheck && spot != Spots.updateAuto)) spot,
+        ...extra,
+      ],
       features: ref.watch(featureSectionsProvider),
       zh: _zh,
       en: _en,

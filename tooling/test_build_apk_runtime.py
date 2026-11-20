@@ -63,7 +63,7 @@ apk.write_bytes(b'fake APK: shell flow only')
 ''')
         flutter.chmod(0o755)
         aapt = tools / "aapt2"
-        aapt.write_text(f"#!{sys.executable}\n" + '''print("package: name='fixture' versionCode='10251234' versionName='1.0.0'")
+        aapt.write_text(f"#!{sys.executable}\n" + '''print("package: name='fixture' versionCode='10251234' versionName='1.0.0.dev'")
 ''')
         aapt.chmod(0o755)
         self.env = dict(os.environ, PATH=str(tools) + os.pathsep + os.environ["PATH"],

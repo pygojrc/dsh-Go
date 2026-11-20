@@ -32,13 +32,13 @@ abstract class SideShortcuts : DefaultTask() {
 
     @TaskAction
     fun write() {
-        val main = "android:targetPackage=\"io.github.ccch1mneyyy.dsh_app\""
+        val main = "android:targetPackage=\"dev.ms.dsh_app\""
         val text = source.get().asFile.readText()
         check(main in text) { "shortcuts.xml no longer names the package as $main" }
         val out = outputDir.get().asFile.resolve("xml")
         out.mkdirs()
         out.resolve("shortcuts.xml").writeText(
-            text.replace(main, "android:targetPackage=\"io.github.ccch1mneyyy.dsh_app${suffix.get()}\""))
+            text.replace(main, "android:targetPackage=\"dev.ms.dsh_app${suffix.get()}\""))
     }
 }
 
@@ -59,6 +59,7 @@ fun buildMinuteVersionCode(): Int {
 
 android {
     namespace = "io.github.ccch1mneyyy.dsh_app"
+    buildFeatures.buildConfig = true
     compileSdk = flutter.compileSdkVersion
     // The device tests under src/androidTest are AndroidTestCase tests; these platform libraries
     // carry that API (no longer in android.jar). Device-test classpath only.
@@ -72,7 +73,7 @@ android {
     }
 
     defaultConfig {
-        applicationId = "io.github.ccch1mneyyy.dsh_app"
+        applicationId = "dev.ms.dsh_app"
         if (sideBuild) applicationIdSuffix = sideSuffix
         manifestPlaceholders["appLabel"] = if (sideBuild) "DSH Go 测试" else "DSH Go"
         // java.nio.file (symlinks while unpacking the rootfs) needs API 26.
@@ -81,7 +82,8 @@ android {
         // files does not apply to binaries inside the rootfs.
         targetSdk = 28
         versionCode = flutter.versionCode.takeIf { it > 1 } ?: buildMinuteVersionCode()
-        versionName = flutter.versionName
+        // 展示后缀只用于 Android 安装包，不参与 Dart 版本比较。
+        versionName = "${flutter.versionName}.dev"
     }
 
     flavorDimensions += "abi"

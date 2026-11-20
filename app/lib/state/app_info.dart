@@ -8,6 +8,15 @@ import '../l10n/l10n.dart';
 abstract final class AppInfo {
   static const version = String.fromEnvironment('DSH_APP_VERSION', defaultValue: '1.3.0+1');
 
+  /// Android 展示版本，对应 APK 的 versionName。
+  static String get androidVersionName => '${version.split('+').first}.dev';
+
+  /// 服务端兼容版本由 [version] 提供，Android 界面单独显示发行后缀。
+  static String get androidDisplayVersion {
+    final parts = version.split('+');
+    return parts.length == 2 ? '$androidVersionName (${parts[1]})' : androidVersionName;
+  }
+
   /// "1.0.0 (1)" for display.
   static String get displayVersion {
     final parts = version.split('+');

@@ -23,6 +23,9 @@ final androidSystemFeaturesProvider = Provider<bool>(
   (ref) => androidSystemFeaturesOn(ref.watch(operatingSystemProvider)),
 );
 
+/// Android 开发版通过 Release 手动安装，保留其他平台已有的检查流程。
+final appUpdateAvailableProvider = Provider<bool>((ref) => ref.watch(operatingSystemProvider) != 'android');
+
 /// Whether flutter_webrtc has an implementation here, for DSH Remote's direct path.
 final webRtcAvailableProvider = Provider<bool>((ref) => webRtcOn(ref.watch(operatingSystemProvider)));
 

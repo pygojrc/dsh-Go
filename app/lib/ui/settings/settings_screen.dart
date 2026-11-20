@@ -8,6 +8,7 @@ import '../../runtime/local_footprint.dart';
 import '../../runtime/runtime_state.dart';
 import '../../state/account_state.dart';
 import '../../state/android_features.dart';
+import '../../state/app_info.dart';
 import '../../state/ask_ai.dart' show askAiAvailableProvider;
 import '../../state/balance_state.dart';
 import '../../state/connection_state.dart';
@@ -129,8 +130,8 @@ class SettingsScreen extends ConsumerWidget {
     final ssh = ref.watch(hostsProvider.select((s) => s.ssh.length));
     final hostName = host.isLocal ? l10n.commonThisPhone : ref.watch(hostNameProvider(host)) ?? l10n.commonRemoteHost;
     // 帮助与关于.
-    final update = ref.watch(appUpdateProvider);
-    final newVersion = update.hasUpdate && !update.isSkipped;
+    final update = ref.watch(appUpdateAvailableProvider) ? ref.watch(appUpdateProvider) : null;
+    final newVersion = update != null && update.hasUpdate && !update.isSkipped;
 
     final page = AppPage.list(
       title: l10n.commonSettings,
@@ -336,7 +337,10 @@ class SettingsScreen extends ConsumerWidget {
               spot: SettingsIndex.entry(SettingsPageId.about),
               value: newVersion
                   ? UpdateBadge(l10n.hubAboutNewVersion)
-                  : Text(update.current.name, style: AppType.tabular(Theme.of(context).textTheme.bodyMedium!)),
+                  : Text(
+                      update?.current.name ?? AppInfo.androidVersionName,
+                      style: AppType.tabular(Theme.of(context).textTheme.bodyMedium!),
+                    ),
               onTap: () => _push(context, const AboutPage()),
             ),
           ],

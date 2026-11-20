@@ -1,0 +1,119 @@
+name: Android dev APK
+
+on:
+  workflow_dispatch:
+    inputs:
+      publish:
+        description: 将 APK 发布为已有 .dev 标签的 GitHub 预发布版本
+        type: boolean
+        default: false
+
+permissions:
+  contents: read
+
+concurrency:
+  group: android-dev-apk-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  build:
+    if: github.repository == 'pygojrc/dsh-Go' && github.ref == 'refs/heads/ms-dev'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 60
+    outputs:
+      tag: ${{ steps.package.outputs.tag }}
+    env:
+      DSH_MAVEN_MIRRORS: '0'
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-java@b843ebf9b913146b38da2eaa7aeddf76074ae1ad # v6.1.0
+        with:
+          distribution: temurin
+          java-version: '17'
+      - uses: subosito/flutter-action@1a449444c387b1966244ae4d4f8c696479add0b2 # v2
+        with:
+          flutter-version: '3.47.7'
+          channel: stable
+          cache: true
+      - name: 准备固定版本的 Android 构建工具
+        run: |
+          sdkmanager 'platforms;android-36' 'build-tools;36.0.0' 'ndk;28.2.13676358' 'cmake;3.22.1'
+          echo "ANDROID_NDK_HOME=$ANDROID_HOME/ndk/28.2.13676358" >> "$GITHUB_ENV"
+      - name: 构建 arm64 本机运行时
+        run: bash runtime/build-runtime.sh arm64-v8a
+      - name: 同步 Flutter 锁定依赖
+        working-directory: app
+        run: flutter pub get --enforce-lockfile
+      - name: 编译并校验签名 APK
+        id: package
+        env:
+          DSH_ANDROID_KEYSTORE_B64: ${{ secrets.DSH_ANDROID_KEYSTORE_B64 }}
+          DSH_ANDROID_KEYSTORE_PASSWORD: ${{ secrets.DSH_ANDROID_KEYSTORE_PASSWORD }}
+          DSH_ANDROID_CERT_SHA256: ${{ secrets.DSH_ANDROID_CERT_SHA256 }}
+          DSH_BETA_TOKEN_FILE: ''
+        run: |
+          # 只复用现有密钥。缺失或指纹不符时失败，避免输出 debug 签名 APK。
+          : "${DSH_ANDROID_KEYSTORE_B64:?缺少签名密钥}"
+          : "${DSH_ANDROID_KEYSTORE_PASSWORD:?缺少签名密码}"
+          : "${DSH_ANDROID_CERT_SHA256:?缺少签名证书指纹}"
+          umask 077
+          key="$RUNNER_TEMP/dsh-go.p12"
+          properties=app/android/key.properties
+          test ! -e "$properties"
+          trap 'rm -f -- "$key" "$properties"' EXIT
+          printf '%s' "$DSH_ANDROID_KEYSTORE_B64" | base64 --decode > "$key"
+          printf 'storeFile=%s\nstorePassword=%s\nkeyAlias=dsh-go\nkeyPassword=%s\n' \
+            "$key" "$DSH_ANDROID_KEYSTORE_PASSWORD" "$DSH_ANDROID_KEYSTORE_PASSWORD" > "$properties"
+          unset DSH_ANDROID_KEYSTORE_B64 DSH_ANDROID_KEYSTORE_PASSWORD
+          bash tooling/build-apk.sh --no-companion -f arm64
+
+          apk=app/build/app/outputs/flutter-apk/app-arm64-release.apk
+          tools="$ANDROID_HOME/build-tools/36.0.0"
+          version=$(sed -n 's/^version:[[:space:]]*\([^+[:space:]]*\).*/\1/p' app/pubspec.yaml)
+          badge=$("$tools/aapt2" dump badging "$apk")
+          grep -Fq "package: name='dev.ms.dsh_app'" <<< "$badge"
+          grep -Fq "versionName='$version.dev'" <<< "$badge"
+          grep -Fxq "native-code: 'arm64-v8a'" <<< "$badge"
+          certs=$("$tools/apksigner" verify --min-sdk-version 21 --print-certs "$apk")
+          fingerprint=$(sed -n 's/^Signer #1 certificate SHA-256 digest: //p' <<< "$certs")
+          test "$fingerprint" = "$DSH_ANDROID_CERT_SHA256"
+
+          mkdir -p dist
+          name="dsh-go-$version.dev-arm64.apk"
+          cp "$apk" "dist/$name"
+          (cd dist && sha256sum "$name" > SHA256SUMS)
+          echo "tag=v$version.dev" >> "$GITHUB_OUTPUT"
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: android-dev-arm64
+          path: dist/
+          compression-level: 0
+          if-no-files-found: error
+
+  publish:
+    if: inputs.publish
+    needs: build
+    runs-on: ubuntu-24.04
+    permissions:
+      contents: write
+    steps:
+      # 发布标签必须指向本次已经编译和验证的源码提交。
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: refs/tags/${{ needs.build.outputs.tag }}
+          persist-credentials: false
+      - uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8
+        with:
+          name: android-dev-arm64
+          path: dist
+      - name: 发布已签名 APK
+        env:
+          GH_TOKEN: ${{ github.token }}
+          TAG: ${{ needs.build.outputs.tag }}
+        run: |
+          test "$(git rev-parse HEAD)" = "$GITHUB_SHA"
+          (cd dist && sha256sum --check SHA256SUMS)
+          gh release create "$TAG" dist/*.apk dist/SHA256SUMS --repo "$GITHUB_REPOSITORY" \
+            --verify-tag --prerelease --title "$TAG" --notes "Android arm64 · $GITHUB_SHA"

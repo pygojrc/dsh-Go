@@ -97,6 +97,7 @@ else
   # Gradle treats 1 as pubspec's placeholder and replaces it with the build minute.
   ((code != 1)) || die "build number 1 is reserved for the pubspec placeholder; omit --build-number for automatic numbering"
 fi
+apk_name="${name}.dev"
 when=$(python3 "$ROOT/tooling/build_number.py" --decode "$code" 2>/dev/null || echo "custom")
 
 platform_of() { case "$1" in arm64) echo android-arm64 ;; x64) echo android-x64 ;; esac; }
@@ -139,7 +140,7 @@ if ((side)); then
 else
   unset DSH_SIDE_BUILD
 fi
-echo "dsh-go $name ($code, $when) · $mode · ${flavors[*]}$( ((beta)) && echo ' · beta channel')$( ((side)) && echo ' · side (dsh_app.test)')"
+echo "dsh-go $apk_name ($code, $when) · $mode · ${flavors[*]}$( ((beta)) && echo ' · beta channel')$( ((side)) && echo ' · side (dsh_app.test)')"
 if ((dry)); then
   for c in "${commands[@]}"; do echo "(cd app && ${c% })"; done
   ((keep_daemon)) || echo "(cd app/android && ./gradlew --stop)"
@@ -223,12 +224,12 @@ for i in "${!flavors[@]}"; do
   fi
   if [[ -n $aapt2 ]]; then
     badge=$("$aapt2" dump badging "$apk" 2>/dev/null | sed -n '/^package:/p' || true)
-    [[ $badge == *"versionCode='$code'"* && $badge == *"versionName='$name'"* ]] ||
-      die "$f: APK says ${badge:-nothing}; expected versionName '$name' versionCode '$code'"
+    [[ $badge == *"versionCode='$code'"* && $badge == *"versionName='$apk_name'"* ]] ||
+      die "$f: APK says ${badge:-nothing}; expected versionName '$apk_name' versionCode '$code'"
   fi
   built+=("$apk")
 done
 
 echo
-echo "dsh-go $name ($code, $when)"
+echo "dsh-go $apk_name ($code, $when)"
 for apk in "${built[@]}"; do echo "  ${apk#"$ROOT/"}"; done

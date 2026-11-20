@@ -32,7 +32,7 @@ set -euo pipefail
 
 ROOT=$(CDPATH= cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)
 APP="$ROOT/app"
-PKG=io.github.ccch1mneyyy.dsh_app
+PKG=dev.ms.dsh_app
 APK="$APP/build/app/outputs/flutter-apk/app-arm64-debug.apk"
 
 usage() { sed -n '2,15p' "${BASH_SOURCE[0]}" | sed 's/^# \{0,1\}//'; }
@@ -146,5 +146,6 @@ cd "$APP"
 name=$(sed -n 's/^ *versionName=\([^[:space:]]*\).*/\1/p' <<<"$package" | head -n 1)
 code=$(sed -n 's/^ *versionCode=\([0-9]*\).*/\1/p' <<<"$package" | head -n 1)
 # The same define the APK was built with, or a reload would change what it reads.
+name=${name%.dev}
 exec_flutter=(flutter attach -d "$serial" --app-id "$PKG" "--dart-define=DSH_APP_VERSION=$name+$code")
 "${exec_flutter[@]}"
