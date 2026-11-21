@@ -13,10 +13,10 @@ import 'pet_library.dart';
 import 'pet_state.dart';
 
 /// The pets that ship with the app, in picker order.
-const builtInPets = ['deepy-whale', 'whale-girl', 'pink-fish'];
+const builtInPets = ['xiaoxi'];
 
 /// The default pet.
-const defaultPetId = 'deepy-whale';
+const defaultPetId = 'xiaoxi';
 
 /// Explicit choice for the existing Android overlay. Pixel remains the default.
 enum PetOverlayRenderer {
@@ -172,7 +172,11 @@ class PetPrefsController extends Notifier<PetPrefs> {
       if (!ref.mounted) return;
       await performanceReady(ref);
       if (!ref.mounted) return;
-      final pack = prefs.getString(keys.pack);
+      // 已主动选择旧内置桌宠的用户，升级后继续显示默认桌宠。
+      final pack = switch (prefs.getString(keys.pack)) {
+        'deepy-whale' || 'whale-girl' || 'pink-fish' => defaultPetId,
+        final id => id,
+      };
       // A brought pet stays chosen; removing it here picks the default
       // (UserPetsController.remove).
       final explicit = pack == noPetId || builtInPets.contains(pack) || (pack != null && isUserPet(pack));

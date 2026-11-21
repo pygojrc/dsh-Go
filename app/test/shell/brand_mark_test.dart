@@ -69,9 +69,10 @@ void main() {
     // The glyph sits in the tile's visible square like the launcher's glyph.
     expect(BrandGlyph.tileBox.contains(BrandGlyph.box.topLeft), isTrue);
     expect(BrandGlyph.tileBox.contains(BrandGlyph.box.bottomRight), isTrue);
-    // Visual centre: a little below the box's middle, near the middle across.
+    // 月弧的墨迹偏左，启动器画布按墨迹质心留白。
     expect(BrandMark.visualCentre.dy, inInclusiveRange(0.5, 0.65));
-    expect((BrandMark.visualCentre.dx - 0.5).abs(), lessThan(0.05));
+    expect(BrandGlyph.centroid.dx, inInclusiveRange(52, 56));
+    expect(BrandGlyph.centroid.dy, inInclusiveRange(54, 59));
   });
 
   testWidgets('sizes: the glyph keeps its aspect, the tile is square', (tester) async {
@@ -93,7 +94,9 @@ void main() {
     expect(tester.getSize(find.byKey(const ValueKey('tile'))), const Size(52, 52));
     final shift = BrandMark.opticalShift(40);
     expect(shift.dy, lessThan(0));
-    expect(shift.dx.abs(), lessThan(40 * BrandMark.aspect * 0.05));
+    // 月弧的质心偏左，标识向右移动后与画布中心重合。
+    final inkX = (BrandGlyph.centroid.dx - BrandGlyph.box.left) * 40 / BrandGlyph.box.height;
+    expect(inkX + shift.dx, closeTo(20 * BrandMark.aspect, 0.001));
   });
 
   group('lockup', () {

@@ -25,11 +25,14 @@ abstract final class AppInfo {
 
   /// The app's name as the phone shows it: launcher, Recents, notifications, system
   /// settings, the licence page. Matches `android:label` in AndroidManifest.xml.
-  static const name = 'DSH Go';
+  static const name = '澄汐';
 
   /// The in-app wordmark: the drawer's lockup, the welcome page and the brand mark's
   /// spoken label.
-  static const wordmark = 'DSH';
+  static const wordmark = '澄汐';
+
+  /// 澄汐的项目仓库，供分享卡片和项目入口使用。
+  static const projectRepo = 'pygojrc/dsh-Go';
 
   /// Required wording: the app is built on DSH but is not an official DeepSeek product.
   /// Shown on the About and licence pages.

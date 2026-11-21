@@ -61,10 +61,10 @@ Shows your DeepSeek account or API key and balance; tap it to open your account.
 - **Help**: takes "what can this app do" to a new chat, where the AI answers from this guide. Not shown in Web mode.
 - **Community**: chat groups and the forum.
 - **Diagnostics**: inspect the environment, export a bundle, or enable **Automatic failure analysis** (off by default); see [FAQ](11-faq.md).
-- **About DSH Go**:
+- **About Chengxi**:
   - **Version**: the app version, such as 1.3.0.dev (11210539), with the build number in parentheses.
   - Install a newer version manually: download the Android development APK from [pygojrc’s GitHub Releases](https://github.com/pygojrc/dsh-Go/releases) and open it to install. An APK with the same package name and signing key and a higher build number can install over the existing app. The upstream and development apps can coexist and store their data separately.
-  - **Star DSH Go on GitHub**: opens the project page, where you can star it or share it with friends.
+  - **Star Chengxi on GitHub**: opens the project page, where you can star it or share it with friends.
   - **Open-source licenses**.
 
 ## Permissions

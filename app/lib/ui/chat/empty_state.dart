@@ -8,7 +8,7 @@ import '../common/fade_in.dart';
 import '../theme/app_icons.dart';
 import '../theme/theme.dart';
 import 'empty_actions.dart';
-import 'widgets/whale_tail.dart';
+import '../shell/brand_mark.dart';
 
 /// 一条建议:一枚带色底的线性小图标 + 标题 + 一行说明,点了把 [prompt] 填进输入条。
 class ChatSuggestion {
@@ -17,7 +17,10 @@ class ChatSuggestion {
       _prompt = prompt,
       _defaultIndex = null;
 
-  const ChatSuggestion._default(this.icon, this._defaultIndex, this.tint) : _label = null, _prompt = null, _detail = null;
+  const ChatSuggestion._default(this.icon, this._defaultIndex, this.tint)
+    : _label = null,
+      _prompt = null,
+      _detail = null;
 
   final IconData icon;
   final SuggestionTint tint;
@@ -265,7 +268,7 @@ class ChatEmptyState extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
               // The pet stands on the composer below: one mascot a screen,
-              // so the still whale tail fades while the pet is drawn. Its
+              // so the app mark fades while the pet is drawn. Its
               // room stays, so nothing moves when the pet comes and goes.
               enter(
                 Consumer(
@@ -277,13 +280,7 @@ class ChatEmptyState extends StatelessWidget {
                   ),
                   child: Padding(
                     padding: const EdgeInsets.only(bottom: 12),
-                    child: Center(
-                      child: WhaleTail(
-                        still: true,
-                        height: 40,
-                        color: whaleColorFor(theme.brightness).withValues(alpha: 0.4),
-                      ),
-                    ),
+                    child: Center(child: BrandMark(size: 40, color: theme.colorScheme.primary.withValues(alpha: 0.45))),
                   ),
                 ),
               ),
@@ -314,10 +311,7 @@ class ChatEmptyState extends StatelessWidget {
                   ),
                 ),
               ],
-              if (connected && options != null) ...[
-                const SizedBox(height: optionsGap),
-                enter(Center(child: options!)),
-              ],
+              if (connected && options != null) ...[const SizedBox(height: optionsGap), enter(Center(child: options!))],
               if (suggestions.isNotEmpty || tipList.isNotEmpty)
                 ExpandReveal(
                   open: retry == null && idle == null,

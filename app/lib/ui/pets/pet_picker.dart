@@ -27,12 +27,7 @@ import '../theme/theme.dart';
 import 'pet_sprite.dart';
 
 /// Names for the picker before a pack has loaded (and for 不显示).
-Map<String, String> get petNames => {
-  'deepy-whale': appL10n.botsPetDeepy,
-  'whale-girl': appL10n.botsPetWhaleGirl,
-  'pink-fish': appL10n.botsPetPinkFish,
-  noPetId: appL10n.botsPetNone,
-};
+Map<String, String> get petNames => {defaultPetId: appL10n.botsPetXiaoxi, noPetId: appL10n.botsPetNone};
 
 /// Picks a pack zip: a file the importer can read. Null when cancelled.
 final petPackPickerProvider = Provider<Future<File?> Function()>(

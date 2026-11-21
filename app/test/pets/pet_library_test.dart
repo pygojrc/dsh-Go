@@ -141,8 +141,8 @@ void main() {
     expect(pngIntact(png(2, 2, interlace: 1, data: List.filled(5 + 5 + 8, 0))), isFalse);
   });
 
-  test('the shipped packs pass every check an import makes', () {
-    for (final id in ['deepy-whale', 'whale-girl']) {
+  test('the shipped pack and legacy fixtures pass every check an import makes', () {
+    for (final id in ['xiaoxi', 'deepy-whale', 'whale-girl']) {
       final dir = 'assets/pets/$id';
       final json = jsonDecode(File('$dir/pack.json').readAsStringSync()) as Map<String, Object?>;
       expect(overlayPackProblem(json), isNull, reason: id);

@@ -28,9 +28,12 @@ import 'package:flutter_test/flutter_test.dart';
 
 export '../chat/support/harness.dart' show testApp, usePhoneView, testTheme;
 
-/// A shipped pack, from `assets/pets/<id>/pack.json`.
-PetPack diskPack(String id) =>
-    PetPack.parse(jsonDecode(File('assets/pets/$id/pack.json').readAsStringSync()) as Map<String, Object?>);
+/// 从源码目录读取桌宠。旧桌宠仅作为测试夹具，未打包为 Flutter 资源。
+PetPack diskPack(String id) {
+  final dir = 'assets/pets/$id';
+  final manifest = jsonDecode(File('$dir/pack.json').readAsStringSync()) as Map<String, Object?>;
+  return PetPack.parse(manifest, dir: dir);
+}
 
 final deepy = diskPack('deepy-whale');
 final girl = diskPack('whale-girl');

@@ -98,11 +98,12 @@ Rect hitBox(WidgetTester tester, PetPack pack, [String anim = 'idle']) {
   );
 }
 
-/// The shipped Deepy pack with parts of its pack.json replaced (reactions, bonus).
-PetPack deepyWith(Map<String, Object?> changes) => PetPack.parse({
-  ...jsonDecode(File('assets/pets/deepy-whale/pack.json').readAsStringSync()) as Map<String, Object?>,
-  ...changes,
-});
+/// 替换旧桌宠测试夹具的动作定义，图片仍从源码目录读入。
+PetPack deepyWith(Map<String, Object?> changes) {
+  const dir = 'assets/pets/deepy-whale';
+  final manifest = jsonDecode(File('$dir/pack.json').readAsStringSync()) as Map<String, Object?>;
+  return PetPack.parse({...manifest, ...changes}, dir: dir);
+}
 
 /// A [math.Random] that always draws zero: any chance is hit and index 0 picked.
 class _ZeroRandom implements math.Random {

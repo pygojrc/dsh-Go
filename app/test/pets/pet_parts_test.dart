@@ -210,6 +210,7 @@ void main() {
   });
 
   group('宠物设置', () {
+    final xiaoxi = diskPack(defaultPetId);
     Future<ProviderContainer> page(WidgetTester tester) async {
       usePhoneView(tester);
       final clock = TestClock();
@@ -230,8 +231,7 @@ void main() {
 
     for (final brightness in Brightness.values) {
       testWidgets('golden (${brightness.name})', (tester) async {
-        await warmSheets(tester, deepy, [deepy.animFor(PetStateName.idle)]);
-        await warmSheets(tester, girl, [girl.animFor(PetStateName.idle)]);
+        await warmSheets(tester, xiaoxi, [xiaoxi.animFor(PetStateName.idle)]);
         usePhoneView(tester);
         await tester.pumpWidget(
           testApp(
@@ -258,8 +258,7 @@ void main() {
     // English smoke golden (i18n), light.
     testWidgets('golden (en)', (tester) async {
       useEnglish();
-      await warmSheets(tester, deepy, [deepy.animFor(PetStateName.idle)]);
-      await warmSheets(tester, girl, [girl.animFor(PetStateName.idle)]);
+      await warmSheets(tester, xiaoxi, [xiaoxi.animFor(PetStateName.idle)]);
       usePhoneView(tester);
       await tester.pumpWidget(
         testApp(
@@ -281,12 +280,11 @@ void main() {
       image!.dispose();
     });
 
-    testWidgets('three choices with names, the source line, size and quiet mode', (tester) async {
+    testWidgets('小汐 and 不显示, the source line, size and quiet mode', (tester) async {
       await page(tester);
-      expect(find.text('Deepy 小鲸鱼'), findsOneWidget);
-      expect(find.text('鲸娘'), findsOneWidget);
+      expect(find.text('小汐'), findsOneWidget);
       expect(find.text('不显示'), findsOneWidget);
-      expect(find.textContaining('来自 DSH-TUI'), findsOneWidget);
+      expect(find.textContaining('澄汐原创桌宠'), findsOneWidget);
       expect(find.text('大小'), findsOneWidget);
       for (final s in ['小', '标准', '大', '自定义']) {
         expect(find.text(s), findsOneWidget);
@@ -297,9 +295,9 @@ void main() {
 
     testWidgets('choosing: the pet, its size, quiet; 不显示 folds the rest away', (tester) async {
       final c = await page(tester);
-      await tester.tap(find.text('鲸娘'));
+      await tester.tap(find.text('小汐'));
       await tester.pump();
-      expect(c.read(petPrefsProvider).packId, 'whale-girl');
+      expect(c.read(petPrefsProvider).packId, defaultPetId);
       await tester.ensureVisible(find.text('大'));
       await tester.tap(find.text('大'));
       await tester.pump();

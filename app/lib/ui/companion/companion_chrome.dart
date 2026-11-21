@@ -9,6 +9,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../l10n/l10n.dart';
+import '../../pets/pet_prefs.dart' show defaultPetId;
 import '../../pets/pet_signals.dart';
 import '../../pets/pet_state.dart';
 import '../common/pressable.dart';
@@ -777,8 +778,7 @@ class CompanionWater extends StatelessWidget {
   );
 }
 
-/// The little pixel whale girl the app already ships: on first run and when
-/// something failed, she stands in for the Live2D one.
+/// 导入 Live2D 之前或加载失败时，显示内置桌宠。
 class CompanionPixelWhale extends ConsumerWidget {
   const CompanionPixelWhale({super.key, this.state = PetStateName.idle, this.bodyHeight = 92});
 
@@ -789,12 +789,13 @@ class CompanionPixelWhale extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final pack = ref.watch(petPackProvider('whale-girl')).value;
+    final pack = ref.watch(petPackProvider(defaultPetId)).value;
     final dpr = MediaQuery.devicePixelRatioOf(context);
     if (pack == null) return SizedBox(height: bodyHeight);
     // Whole device pixels per art pixel, or pixel art goes soft.
-    final k = math.max(1, (bodyHeight * dpr / pack.contentBox.height).round());
-    final scale = k / dpr;
+    final scale = pack.pixelArt
+        ? math.max(1, (bodyHeight * dpr / pack.contentBox.height).round()) / dpr
+        : bodyHeight / pack.contentBox.height;
     return SizedBox(
       width: pack.canvas.width * scale,
       height: pack.canvas.height * scale,
