@@ -1,2 +1,17 @@
 # Nested patches are applied to upstream sources byte for byte; never convert their line endings.
 tooling/ios/phone-self-runner/*.patch -text
+
+# Android 发布归档保留构建所需源码，排除含上游品牌的展示图与开发夹具。
+/docs/assets export-ignore
+/site/home export-ignore
+/app/test/**/goldens export-ignore
+/app/assets/pets/deepy-whale export-ignore
+/app/assets/pets/pink-fish export-ignore
+/app/assets/pets/whale-girl export-ignore
+/app/tool/pet_src/deepy-whale export-ignore
+/app/tool/pet_src/pink-fish export-ignore
+/app/tool/pet_src/whale-girl export-ignore
+/app/tool/whale_src export-ignore
+/app/ios/Runner/Assets.xcassets/*/*.png export-ignore
+/app/ohos/AppScope/resources/base/media/*.png export-ignore
+/app/ohos/entry/src/main/resources/base/media/*.png export-ignore

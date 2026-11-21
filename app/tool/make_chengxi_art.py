@@ -86,6 +86,21 @@ def launcher():
     <path android:fillColor="#FFFFFFFF" android:pathData="{WAVES}" />
 </vector>
 ''')
+    # 通知只使用 Alpha，缩放后将同一轮廓放进 24dp 状态栏图标。
+    (RES / "drawable/ic_stat_dsh.xml").write_text(f'''<?xml version="1.0" encoding="utf-8"?>
+<!-- 澄汐通知图标，由 app/tool/make_chengxi_art.py 生成。 -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="24dp"
+    android:height="24dp"
+    android:viewportWidth="24"
+    android:viewportHeight="24">
+    <group android:pivotX="54" android:pivotY="54" android:scaleX="0.44" android:scaleY="0.44"
+        android:translateX="-42" android:translateY="-42">
+        <path android:fillColor="#FFFFFFFF" android:pathData="{MOON}" />
+        <path android:fillColor="#FFFFFFFF" android:pathData="{WAVES}" />
+    </group>
+</vector>
+''')
     with TemporaryDirectory() as directory:
         master = Path(directory) / "icon.svg"
         for suffix, (start, end, colors) in VARIANTS.items():

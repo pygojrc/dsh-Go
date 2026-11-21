@@ -6,6 +6,8 @@
 
 依次运行 `uv run app/tool/make_xiaoxi_pack.py`、`uv run app/tool/make_chengxi_art.py` 和 `uv run app/tool/make_brand_mark.py` 可重建桌宠图集、小组件、Android 图标、聊天动画和 Flutter 标识。前两个脚本需要 ImageMagick 7，图标生成另需 `rsvg-convert`。
 
+Android 发布的源码 ZIP 与 tar.gz 通过 `.gitattributes` 排除下面列出的旧桌宠、其他平台的原图标、宣传页与截图基线。完整 Git 检出仍保留这些开发素材，归档面向 Android 构建。素材权利说明也随归档保留。
+
 ## 上游素材
 
 DSH Go 的源码以 AGPL-3.0 发布（见 [LICENSE](LICENSE)），但下面这些品牌和美术素材**不在 AGPL-3.0 授权范围内**。它们的版权归 ccch1mneyyy（DSH-TUI）所有，保留所有权利。
