@@ -58,6 +58,36 @@ jobs:
           echo "ANDROID_NDK_HOME=$sdk/ndk/28.2.13676358" >> "$GITHUB_ENV"
       - name: 构建 arm64 本机运行时
         run: bash runtime/build-runtime.sh arm64-v8a
+      - name: 配置 Maven Central 镜像
+        run: |
+          gradle_home=${GRADLE_USER_HOME:-$HOME/.gradle}
+          mkdir -p "$gradle_home/init.d"
+          cat > "$gradle_home/init.d/ci-maven-central.gradle" <<'GRADLE'
+          import org.gradle.api.artifacts.repositories.MavenArtifactRepository
+
+          def centralMirror = 'https://maven-central.storage-download.googleapis.com/maven2/'
+          def useCentralMirror = { repositories ->
+              repositories.withType(MavenArtifactRepository).configureEach { repository ->
+                  if (repository.url?.host == 'repo.maven.apache.org') {
+                      repository.setUrl(centralMirror)
+                  }
+              }
+          }
+
+          // Flutter 的 Gradle 插件是独立的 included build，也需要先查 Maven Central 镜像。
+          gradle.beforeSettings { settings ->
+              settings.pluginManagement.repositories {
+                  google()
+                  maven { url = centralMirror }
+                  gradlePluginPortal()
+              }
+              useCentralMirror(settings.dependencyResolutionManagement.repositories)
+          }
+          gradle.beforeProject { project ->
+              useCentralMirror(project.repositories)
+              useCentralMirror(project.buildscript.repositories)
+          }
+          GRADLE
       - name: 同步 Flutter 锁定依赖
         working-directory: app
         run: flutter pub get --enforce-lockfile
