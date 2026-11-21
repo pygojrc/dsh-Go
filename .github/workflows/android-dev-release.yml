@@ -42,15 +42,13 @@ jobs:
           persist-credentials: false
       - name: 从原标签恢复发布
         if: github.event_name == 'push' && github.ref == 'refs/heads/ms-dev'
-        env:
-          PREVIOUS_HEAD: ${{ github.event.before }}
         run: |
-          # 仅修订发布 workflow 时，可重跑之前已复核的分支头标签。
+          # 只允许发布 workflow 与已复核的标签存在差异。
           version=$(sed -n 's/^version:[[:space:]]*\([^+[:space:]]*\).*/\1/p' app/pubspec.yaml)
           git fetch --depth=1 origin "refs/tags/v$version.dev"
-          test "$(git rev-parse 'FETCH_HEAD^{commit}')" = "$PREVIOUS_HEAD"
-          git diff --quiet "$PREVIOUS_HEAD" HEAD -- . ':(exclude).github/workflows/android-dev-release.yml'
-          git switch --detach "$PREVIOUS_HEAD"
+          tagged_commit=$(git rev-parse 'FETCH_HEAD^{commit}')
+          git diff --quiet "$tagged_commit" HEAD -- . ':(exclude).github/workflows/android-dev-release.yml'
+          git switch --detach "$tagged_commit"
       - name: 核对发布标签与源码归档
         if: github.event_name == 'push'
         run: |
@@ -72,8 +70,11 @@ jobs:
           cache: true
       - name: 准备固定版本的 Android 构建工具
         run: |
-          sdkmanager 'platforms;android-36' 'build-tools;36.0.0' 'ndk;28.2.13676358' 'cmake;3.22.1'
-          echo "ANDROID_NDK_HOME=$ANDROID_HOME/ndk/28.2.13676358" >> "$GITHUB_ENV"
+          sdk=${ANDROID_HOME:-/usr/local/lib/android/sdk}
+          "$sdk/cmdline-tools/latest/bin/sdkmanager" --sdk_root="$sdk" \
+            'platforms;android-36' 'build-tools;36.0.0' 'ndk;28.2.13676358' 'cmake;3.22.1'
+          echo "ANDROID_HOME=$sdk" >> "$GITHUB_ENV"
+          echo "ANDROID_NDK_HOME=$sdk/ndk/28.2.13676358" >> "$GITHUB_ENV"
       - name: 构建 arm64 本机运行时
         run: bash runtime/build-runtime.sh arm64-v8a
       - name: 同步 Flutter 锁定依赖
